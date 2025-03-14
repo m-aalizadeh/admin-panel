@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
+import { User } from "../../../types/user";
 
 const schema = yup
   .object({
@@ -29,8 +30,27 @@ function Signup() {
   } = useForm({ resolver: yupResolver(schema), mode: "onTouched" });
   const router = useRouter();
 
-  const onSubmit = async (values: { [key: string]: any }) => {
-    console.log(values);
+  const onSubmit = async (values: User) => {
+    const data = await fetch("http://localhost:8000/api/v1/user/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        pragma: "no-cache",
+        "cache-control": "no-cache",
+      },
+      body: JSON.stringify(values),
+    });
+    const user = await data.json();
+    if (user?.token) {
+      const { data = {}, token } = user;
+      const { email, _id, username } = data;
+      localStorage.setItem("token", JSON.stringify(token));
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ email, userId: _id, username })
+      );
+      router.push("/panel");
+    }
   };
 
   return (
@@ -76,7 +96,7 @@ function Signup() {
           onClick={() => router.push("/signin")}
           className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600"
         >
-          Sign Up
+          Sign In
         </button>
       </div>
     </div>
