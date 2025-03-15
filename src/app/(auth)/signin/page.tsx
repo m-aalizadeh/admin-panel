@@ -1,11 +1,14 @@
 "use client";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/ui/Button";
 import RHFTextField from "@/ui/RHFTextField";
+import Loader from "@/ui/Loader";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { SignedUser } from "../../../types/user";
+import toast from "react-hot-toast";
 
 const schema = yup
   .object({
@@ -20,9 +23,11 @@ function Signin() {
     handleSubmit,
     formState: { errors, isLoading },
   } = useForm({ resolver: yupResolver(schema), mode: "onTouched" });
+  const [loader, setLoader] = useState(false);
   const router = useRouter();
 
   const onSubmit = async (values: SignedUser) => {
+    setLoader(true);
     const data = await fetch("http://localhost:8000/api/v1/user/signin", {
       method: "POST",
       headers: {
@@ -34,7 +39,10 @@ function Signin() {
     });
     const user = await data.json();
     if (user?.token) {
-      const { data = {}, token } = user;
+      const { data = {}, token, message } = user;
+      toast.success(message, {
+        duration: 2000,
+      });
       const { email, _id, username } = data;
       localStorage.setItem("token", JSON.stringify(token));
       localStorage.setItem(
@@ -42,7 +50,11 @@ function Signin() {
         JSON.stringify({ email, userId: _id, username })
       );
       router.push("/panel");
+    } else {
+      const validationError = user?.validationErrors?.[0]?.msg || user?.message;
+      toast.error(validationError);
     }
+    setLoader(false);
   };
 
   return (
@@ -67,13 +79,12 @@ function Signin() {
           errors={errors}
         />
         <div>
-          {isLoading ? (
-            <div className="spinner-mini"></div>
-          ) : (
-            <Button className="w-full bg-blue-500 text-white p-2 rounded">
-              Sign In
-            </Button>
-          )}
+          <Button
+            disabled={loader}
+            className="w-full bg-blue-500 text-white p-2 rounded"
+          >
+            {loader ? <Loader /> : "Sign In"}
+          </Button>
         </div>
       </form>
       <div className="mt-4 text-center">
