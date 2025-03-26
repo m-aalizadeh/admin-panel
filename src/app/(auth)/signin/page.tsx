@@ -8,11 +8,11 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { SignedUser } from "../../../types/user";
-import toast from "react-hot-toast";
+import { handleAuth } from "../../../services/auth";
 
 const schema = yup
   .object({
-    username: yup.string().required("Name is required"),
+    username: yup.string().required("Username is required"),
     password: yup.string().required("Password is required"),
   })
   .required();
@@ -21,39 +21,19 @@ function Signin() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isLoading },
+    formState: { errors },
   } = useForm({ resolver: yupResolver(schema), mode: "onTouched" });
   const [loader, setLoader] = useState(false);
   const router = useRouter();
 
   const onSubmit = async (values: SignedUser) => {
     setLoader(true);
-    const data = await fetch("http://localhost:8000/api/v1/user/signin", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        pragma: "no-cache",
-        "cache-control": "no-cache",
-      },
-      body: JSON.stringify(values),
+    await handleAuth({
+      endpoint: "user/signin",
+      values,
+      router,
+      redirectPath: "/panel",
     });
-    const user = await data.json();
-    if (user?.token) {
-      const { data = {}, token, message } = user;
-      toast.success(message, {
-        duration: 2000,
-      });
-      const { email, _id, username } = data;
-      localStorage.setItem("token", JSON.stringify(token));
-      localStorage.setItem(
-        "user",
-        JSON.stringify({ email, userId: _id, username })
-      );
-      router.push("/panel");
-    } else {
-      const validationError = user?.validationErrors?.[0]?.msg || user?.message;
-      toast.error(validationError);
-    }
     setLoader(false);
   };
 
@@ -83,7 +63,13 @@ function Signin() {
             disabled={loader}
             className="w-full bg-blue-500 text-white p-2 rounded"
           >
-            {loader ? <Loader /> : "Sign In"}
+            {loader ? (
+              <div className="flex items-center justify-center">
+                <Loader />
+              </div>
+            ) : (
+              "Sign In"
+            )}
           </Button>
         </div>
       </form>
