@@ -40,7 +40,7 @@ function Signup() {
       endpoint: "user/signup",
       values,
       router,
-      redirectPath: "/panel",
+      redirectPath: "/dashboard",
     });
     setLoader(false);
   };

@@ -32,7 +32,7 @@ function Signin() {
       endpoint: "user/signin",
       values,
       router,
-      redirectPath: "/panel",
+      redirectPath: "/dashboard",
     });
     setLoader(false);
   };
