@@ -88,6 +88,12 @@ export default function DashboardPage() {
           <button
             className="text-blue-600 hover:text-blue-900"
             onClick={() => {
+              if (user.role !== "admin") {
+                toast.error("Only admin users can do this action", {
+                  duration: 2000,
+                });
+                return;
+              }
               setSelectedUser(row._id);
               setIsDialogOpen(true);
             }}
