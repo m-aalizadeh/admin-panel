@@ -21,11 +21,11 @@ export async function handleAuth({
     if (response?.token) {
       const { data = {}, token, message } = response;
       toast.success(message, { duration: 2000 });
-      const { email, _id, username } = data;
+      const { email, _id, username, role } = data;
       localStorage.setItem("token", JSON.stringify(token));
       localStorage.setItem(
         "user",
-        JSON.stringify({ email, userId: _id, username })
+        JSON.stringify({ email, userId: _id, username, role })
       );
       router.push(redirectPath);
       return true;
