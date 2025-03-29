@@ -1,33 +1,38 @@
 "use client";
+import { useState, useEffect } from "react";
 import DataTable from "@/ui/DataTable";
+import { commonFetch } from "@/services/api";
 
 interface User {
-  id: string;
   name: string;
   email: string;
-  role: string;
+  username: string;
+  id: string;
   status: "active" | "inactive";
-  lastLogin: string;
+  phoneNumber: string;
 }
 
 export default function DashboardPage() {
-  // Mock data - replace with your actual data fetching logic
-  const users: User[] = [
-    {
-      id: "1",
-      name: "John Doe",
-      email: "john@example.com",
-      role: "Admin",
-      status: "active",
-      lastLogin: "2023-05-15T10:30:00Z",
-    },
-    // Add more users...
-  ];
+  const [users, setUsers] = useState([]);
+
+  const fetchUsers = async () => {
+    const response = await commonFetch("GET", "users/allUsers");
+    if (
+      response?.users &&
+      Array.isArray(response.users) &&
+      response.users.length
+    ) {
+      setUsers(response.users);
+    }
+  };
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const columns = [
     { header: "Name", accessor: "name" },
     { header: "Email", accessor: "email" },
-    { header: "Role", accessor: "role" },
+    { header: "Username", accessor: "username" },
     {
       header: "Status",
       accessor: "status",
@@ -43,7 +48,7 @@ export default function DashboardPage() {
         </span>
       ),
     },
-    { header: "Last Login", accessor: "lastLogin" },
+    { header: "Phone Number", accessor: "phoneNumber" },
     {
       header: "Actions",
       accessor: "id",
@@ -60,7 +65,7 @@ export default function DashboardPage() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">User Management</h1>
-      <DataTable<User> data={users} columns={columns} itemsPerPage={5} />
+      <DataTable data={users} columns={columns} itemsPerPage={5} />
     </div>
   );
 }

@@ -6,10 +6,6 @@ interface FetchOptions {
   body?: string;
 }
 
-interface User {
-  accessToken?: string;
-}
-
 export const commonFetch = async (
   method: "GET" | "POST" | "PATCH" | "DELETE",
   queryParams?: string,
@@ -25,19 +21,16 @@ export const commonFetch = async (
       finalEndPoint += "?" + queryString;
     }
 
-    const userString = localStorage.getItem("user");
-    const user: User | null = userString ? JSON.parse(userString) : null;
-
     let headers: Record<string, string> = {
       "Content-Type": "application/json",
       pragma: "no-cache",
       "cache-control": "no-cache",
     };
 
-    if (user?.accessToken) {
-      headers = { ...headers, Authorization: `Bearer ${user.accessToken}` };
+    const token = localStorage.getItem("token");
+    if (token) {
+      headers = { ...headers, Authorization: `Bearer ${JSON.parse(token)}` };
     }
-
     let content: FetchOptions;
     switch (method) {
       case "POST":
