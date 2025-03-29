@@ -1,4 +1,3 @@
-// components/DataTable.tsx
 "use client";
 
 import { useState } from "react";
@@ -85,8 +84,6 @@ function DataTable<T extends Record<string, any>>({
           </tbody>
         </table>
       </div>
-
-      {/* Pagination Controls */}
       {totalPages > 1 && (
         <div className="px-6 py-3 flex items-center justify-between border-t border-gray-200">
           <div className="flex-1 flex justify-between sm:hidden">

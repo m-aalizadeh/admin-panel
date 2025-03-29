@@ -2,18 +2,24 @@
 import { useState, useEffect } from "react";
 import DataTable from "@/ui/DataTable";
 import { commonFetch } from "@/services/api";
-
+import ConfirmationDialog from "@/ui/ConfirmationDialog";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 interface User {
   name: string;
   email: string;
   username: string;
-  id: string;
+  _id: string;
   status: "active" | "inactive";
   phoneNumber: string;
 }
 
 export default function DashboardPage() {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const router = useRouter();
   const [users, setUsers] = useState([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<string>("");
 
   const fetchUsers = async () => {
     const response = await commonFetch("GET", "users/allUsers");
@@ -25,6 +31,22 @@ export default function DashboardPage() {
       setUsers(response.users);
     }
   };
+
+  const deleteUser = async () => {
+    const response = await commonFetch(
+      "DELETE",
+      `users/deleteUser/${selectedUser}`
+    );
+    if (response.status === "success") {
+      toast.success(response.message, { duration: 2000 });
+    } else {
+      toast.error(response.message, { duration: 2000 });
+    }
+    setSelectedUser("");
+    setIsDialogOpen(false);
+    router.refresh();
+  };
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -50,12 +72,28 @@ export default function DashboardPage() {
     },
     { header: "Phone Number", accessor: "phoneNumber" },
     {
-      header: "Actions",
-      accessor: "id",
+      header: "Modify User",
+      accessor: "_id",
       render: (value: string, row: User) => {
-        // console.log(value, row);
         return (
           <button className="text-blue-600 hover:text-blue-900">Edit</button>
+        );
+      },
+    },
+    {
+      header: "Delete User",
+      accessor: "_id",
+      render: (value: string, row: User) => {
+        return (
+          <button
+            className="text-blue-600 hover:text-blue-900"
+            onClick={() => {
+              setSelectedUser(row._id);
+              setIsDialogOpen(true);
+            }}
+          >
+            Delete
+          </button>
         );
       },
     },
@@ -69,6 +107,13 @@ export default function DashboardPage() {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">User Management</h1>
       <DataTable data={users} columns={columns} itemsPerPage={5} />
+      <ConfirmationDialog
+        isOpen={isDialogOpen}
+        title="Delete User"
+        message="Are you sure you want to delete this user? This action cannot be undone."
+        onConfirm={deleteUser}
+        onCancel={() => setIsDialogOpen(false)}
+      />
     </div>
   );
 }
