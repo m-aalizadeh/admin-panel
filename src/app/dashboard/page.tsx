@@ -52,9 +52,12 @@ export default function DashboardPage() {
     {
       header: "Actions",
       accessor: "id",
-      render: (value: string) => (
-        <button className="text-blue-600 hover:text-blue-900">Edit</button>
-      ),
+      render: (value: string, row: User) => {
+        // console.log(value, row);
+        return (
+          <button className="text-blue-600 hover:text-blue-900">Edit</button>
+        );
+      },
     },
   ] satisfies {
     header: string;

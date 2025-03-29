@@ -17,6 +17,12 @@ function Sidebar() {
       icon: <FiHome size={20} />,
     },
     {
+      id: "addUser",
+      path: "/dashboard/addUser",
+      name: "Add User",
+      icon: <FiUser size={20} />,
+    },
+    {
       id: "profile",
       path: "/dashboard/profile",
       name: "Profile",
