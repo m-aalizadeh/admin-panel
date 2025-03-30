@@ -75,8 +75,14 @@ export default function DashboardPage() {
       header: "Modify User",
       accessor: "_id",
       render: (value: string, row: User) => {
+        const id = row._id;
         return (
-          <button className="text-blue-600 hover:text-blue-900">Edit</button>
+          <button
+            className="text-blue-600 hover:text-blue-900"
+            onClick={() => router.push(`/dashboard/${id}/editUser`)}
+          >
+            Edit
+          </button>
         );
       },
     },
