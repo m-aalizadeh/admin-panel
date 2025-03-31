@@ -1,7 +1,6 @@
-// services/auth.ts
 import { commonFetch } from "./api";
-import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { User } from "@/types/user";
 
 type AuthParams = {
   endpoint: string;
@@ -10,17 +9,18 @@ type AuthParams = {
   redirectPath: string;
 };
 
+type AuthReturn = { user: User | null; message: string };
+
 export async function handleAuth({
   endpoint,
   values,
   router,
   redirectPath,
-}: AuthParams): Promise<boolean> {
+}: AuthParams): Promise<AuthReturn> {
   try {
     const response = await commonFetch("POST", endpoint, undefined, values);
     if (response?.token) {
       const { data = {}, token, message } = response;
-      toast.success(message, { duration: 2000 });
       const { email, _id, username, role } = data;
       localStorage.setItem("token", JSON.stringify(token));
       localStorage.setItem(
@@ -28,17 +28,16 @@ export async function handleAuth({
         JSON.stringify({ email, userId: _id, username, role })
       );
       router.push(redirectPath);
-      return true;
+      return { user: { email, id: _id, username, role }, message };
     } else {
-      const errorMessage =
+      const message =
         response?.validationErrors?.[0]?.msg ||
         response?.message ||
         "Authentication failed";
-      toast.error(errorMessage);
-      return false;
+      return { message, user: null };
     }
   } catch (error) {
-    toast.error("An unexpected error occurred");
-    return false;
+    console.log(error);
+    return { message: "An unexpected error occurred", user: null };
   }
 }

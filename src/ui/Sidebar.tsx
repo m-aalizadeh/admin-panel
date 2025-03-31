@@ -1,14 +1,13 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { FiHome, FiLogOut, FiUser } from "react-icons/fi";
-
-import React from "react";
+import { useAuth } from "@/context/AuthContext";
 
 function Sidebar() {
-  const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { logout } = useAuth();
   const sideItems = [
     {
       id: "dashboard",
@@ -38,12 +37,7 @@ function Sidebar() {
 
   const handleLogOut = () => {
     setIsLoggingOut(true);
-
-    // Clear client storage
-    localStorage.clear();
-
-    // Redirect
-    router.push("/");
+    logout();
     setIsLoggingOut(false);
   };
   const pathname = usePathname();

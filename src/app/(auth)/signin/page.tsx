@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { SignedUser } from "../../../types/user";
-import { handleAuth } from "../../../services/auth";
+import { useAuth } from "@/context/AuthContext";
 
 const schema = yup
   .object({
@@ -25,15 +25,11 @@ function Signin() {
   } = useForm({ resolver: yupResolver(schema), mode: "onTouched" });
   const [loader, setLoader] = useState(false);
   const router = useRouter();
+  const { signin } = useAuth();
 
   const onSubmit = async (values: SignedUser) => {
     setLoader(true);
-    await handleAuth({
-      endpoint: "user/signin",
-      values,
-      router,
-      redirectPath: "/dashboard",
-    });
+    signin(values);
     setLoader(false);
   };
 

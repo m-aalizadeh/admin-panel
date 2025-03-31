@@ -8,7 +8,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
 import { User } from "../../../types/user";
-import { handleAuth } from "../../../services/auth";
+import { useAuth } from "@/context/AuthContext";
 
 const schema = yup
   .object({
@@ -33,15 +33,11 @@ function Signup() {
   } = useForm({ resolver: yupResolver(schema), mode: "onTouched" });
   const [loader, setLoader] = useState(false);
   const router = useRouter();
+  const { signup } = useAuth();
 
   const onSubmit = async (values: User) => {
     setLoader(true);
-    await handleAuth({
-      endpoint: "user/signup",
-      values,
-      router,
-      redirectPath: "/dashboard",
-    });
+    await signup(values);
     setLoader(false);
   };
 

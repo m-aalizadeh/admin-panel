@@ -2,7 +2,7 @@ import Image from "next/image";
 import { SignedUser } from "../types/user";
 
 type Props = {
-  user: SignedUser;
+  user: SignedUser | null;
 };
 
 function Navbar({ user }: Props) {
@@ -39,7 +39,7 @@ function Navbar({ user }: Props) {
                 />
               </div> */}
               <span className="hidden md:inline text-sm font-medium">
-                {user.username}
+                {user?.username}
               </span>
             </button>
           </div>

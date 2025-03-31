@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 import Head from "next/head";
 import Navbar from "@/ui/Navbar";
 import Sidebar from "@/ui/Sidebar";
+import { useAuth } from "@/context/AuthContext";
 
 type DashboardProps = {
   children: ReactNode;
@@ -10,7 +11,7 @@ type DashboardProps = {
 };
 
 function DashboardLayout({ children, title = "Dashboard" }: DashboardProps) {
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const { user } = useAuth();
   return (
     <div>
       <Head>{title}</Head>
