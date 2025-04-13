@@ -15,26 +15,25 @@ interface DataTableProps<T extends Record<string, any>> {
     accessor: keyof T;
     render?: (value: T[keyof T], row: T) => React.ReactNode;
   }[];
+  totalCount: number;
   itemsPerPage?: number;
+  handlePagination: (page: number) => void;
 }
 
 function DataTable<T extends Record<string, any>>({
   data,
   columns,
   itemsPerPage = 10,
+  totalCount,
+  handlePagination,
 }: DataTableProps<T>) {
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(data.length / itemsPerPage);
-
-  // Paginate data
-  const paginatedData = data.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
+      handlePagination(page - 1);
     }
   };
 
@@ -56,8 +55,8 @@ function DataTable<T extends Record<string, any>>({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {paginatedData.length > 0 ? (
-              paginatedData.map((row, rowIndex) => (
+            {data.length > 0 ? (
+              data.map((row, rowIndex) => (
                 <tr key={rowIndex}>
                   {columns.map((column) => (
                     <td
@@ -111,9 +110,9 @@ function DataTable<T extends Record<string, any>>({
                 </span>{" "}
                 to{" "}
                 <span className="font-medium">
-                  {Math.min(currentPage * itemsPerPage, data.length)}
+                  {Math.min(currentPage * itemsPerPage, totalCount)}
                 </span>{" "}
-                of <span className="font-medium">{data.length}</span> results
+                of <span className="font-medium">{totalCount}</span> results
               </p>
             </div>
             <div>

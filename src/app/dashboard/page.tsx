@@ -1,4 +1,5 @@
 "use client";
+import queryString from "query-string";
 import { useState, useEffect } from "react";
 import DataTable from "@/ui/DataTable";
 import { commonFetch } from "@/services/api";
@@ -21,16 +22,26 @@ export default function DashboardPage() {
   const [users, setUsers] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string>("");
+  const [totalCount, setTotalCount] = useState<number>(0);
 
-  const fetchUsers = async () => {
-    const response = await commonFetch("GET", "users/allUsers");
+  const fetchUsers = async (page: number = 0) => {
+    const response = await commonFetch(
+      "GET",
+      "users/allUsers",
+      queryString.stringify({ page, limit: 5 })
+    );
     if (
       response?.users &&
       Array.isArray(response.users) &&
       response.users.length
     ) {
+      setTotalCount(response.totalCount || users.length);
       setUsers(response.users);
     }
+  };
+
+  const handlePagination = async (page: number) => {
+    await fetchUsers(page);
   };
 
   const deleteUser = async () => {
@@ -119,7 +130,13 @@ export default function DashboardPage() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">User Management</h1>
-      <DataTable data={users} columns={columns} itemsPerPage={5} />
+      <DataTable
+        data={users}
+        columns={columns}
+        itemsPerPage={5}
+        totalCount={totalCount}
+        handlePagination={handlePagination}
+      />
       <ConfirmationDialog
         isOpen={isDialogOpen}
         title="Delete User"
