@@ -5,6 +5,7 @@ import { commonFetch } from "@/services/api";
 import ConfirmationDialog from "@/ui/ConfirmationDialog";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 interface User {
   name: string;
   email: string;
@@ -15,7 +16,7 @@ interface User {
 }
 
 export default function DashboardPage() {
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const { user } = useAuth();
   const router = useRouter();
   const [users, setUsers] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -94,7 +95,7 @@ export default function DashboardPage() {
           <button
             className="text-blue-600 hover:text-blue-900"
             onClick={() => {
-              if (user.role !== "admin") {
+              if (user?.role !== "admin") {
                 toast.error("Only admin users are able do this action", {
                   duration: 2000,
                 });
