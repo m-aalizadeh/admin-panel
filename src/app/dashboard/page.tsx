@@ -45,7 +45,7 @@ export default function DashboardPage() {
     }
     setSelectedUser("");
     setIsDialogOpen(false);
-    router.refresh();
+    fetchUsers();
   };
 
   useEffect(() => {
@@ -96,7 +96,7 @@ export default function DashboardPage() {
             className="text-blue-600 hover:text-blue-900"
             onClick={() => {
               if (user?.role !== "admin") {
-                toast.error("Only admin users are able to do this action", {
+                toast.error("Only admin users are able do this action", {
                   duration: 2000,
                 });
                 return;
