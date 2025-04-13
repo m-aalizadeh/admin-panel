@@ -10,7 +10,8 @@ export const commonFetch = async (
   method: "GET" | "POST" | "PATCH" | "DELETE",
   queryParams?: string,
   queryString?: string,
-  payload?: unknown
+  payload?: unknown,
+  optionalHeaders?: Record<string, string>
 ): Promise<any> => {
   try {
     let finalEndPoint = process.env.BASE_URL || BASE_URL;
@@ -30,6 +31,9 @@ export const commonFetch = async (
     const token = localStorage.getItem("token");
     if (token) {
       headers = { ...headers, Authorization: `Bearer ${JSON.parse(token)}` };
+    }
+    if (optionalHeaders) {
+      headers = { ...headers, ...optionalHeaders };
     }
     let content: FetchOptions;
     switch (method) {

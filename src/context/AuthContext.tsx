@@ -1,8 +1,13 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { createContext, useReducer, useContext } from "react";
+import {
+  createContext,
+  useReducer,
+  useContext,
+  useState,
+  useEffect,
+} from "react";
 import { User, SignedUser } from "../types/user";
-import { handleAuth } from "@/services/auth";
 import { commonFetch } from "@/services/api";
 import toast from "react-hot-toast";
 
@@ -78,10 +83,24 @@ export default function AuthProvider({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [{ user, isAuthenticated, isLoading, error }, dispatch] = useReducer(
+  const [{ user, isAuthenticated, isLoading }, dispatch] = useReducer(
     authReducer,
     initialState
   );
+  const [csrfToken, setCsrfToken] = useState("");
+
+  const getCsrfToken = async () => {
+    try {
+      const response = await commonFetch("GET", "user/csrf-token");
+      setCsrfToken(response.csurfToken);
+    } catch (err) {
+      console.error("Error getting Csrf token");
+    }
+  };
+
+  useEffect(() => {
+    getCsrfToken();
+  }, []);
 
   async function signin(values: SignedUser) {
     dispatch({ type: "loading" });
@@ -90,7 +109,8 @@ export default function AuthProvider({
         "POST",
         "user/signin",
         undefined,
-        values
+        values,
+        { "X-CSRF-Token": csrfToken }
       );
       const { data = {}, token, message } = response;
       const { email, _id, username, role } = data;
@@ -115,7 +135,8 @@ export default function AuthProvider({
         "POST",
         "user/signup",
         undefined,
-        values
+        values,
+        { "X-CSRF-Token": csrfToken }
       );
       const { data = {}, token, message } = response;
       const { email, _id, username, role } = data;
