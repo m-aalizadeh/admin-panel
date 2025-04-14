@@ -7,6 +7,8 @@ import ConfirmationDialog from "@/ui/ConfirmationDialog";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import FilterControl from "@/ui/FilterControls";
+
 interface User {
   name: string;
   email: string;
@@ -23,13 +25,14 @@ export default function DashboardPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string>("");
   const [totalCount, setTotalCount] = useState<number>(0);
+  const [status, setStatus] = useState<string>();
 
   const fetchUsers = async (page: number = 0) => {
-    const response = await commonFetch(
-      "GET",
-      "users/allUsers",
-      queryString.stringify({ page, limit: 5 })
-    );
+    let params = queryString.stringify({ page, limit: 5 });
+    if (status && status !== "all") {
+      params += `&status=${status}`;
+    }
+    const response = await commonFetch("GET", "users/allUsers", params);
     if (
       response?.users &&
       Array.isArray(response.users) &&
@@ -62,6 +65,12 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  useEffect(() => {
+    if (status) {
+      fetchUsers();
+    }
+  }, [status]);
 
   const columns = [
     { header: "Name", accessor: "name" },
@@ -127,9 +136,27 @@ export default function DashboardPage() {
     render?: (value: any, row: User) => React.ReactNode;
   }[];
 
+  const onFilterChange = async (status: string) => {
+    setStatus(status);
+  };
+
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">User Management</h1>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold mb-6">User Management</h1>
+        </div>
+        <div>
+          <FilterControl
+            onFilterChange={onFilterChange}
+            categories={[
+              { id: "all", label: "all" },
+              { id: "active", label: "active" },
+              { id: "inactive", label: "inactive" },
+            ]}
+          />
+        </div>
+      </div>
       <DataTable
         data={users}
         columns={columns}
