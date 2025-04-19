@@ -1,11 +1,19 @@
-import Image from "next/image";
 import { SignedUser } from "../types/user";
+import { useState } from "react";
+import CameraModal from "./CameraModal";
+import Avatar from "./Avatar";
 
 type Props = {
   user: SignedUser | null;
 };
 
 function Navbar({ user }: Props) {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  const handleDialog = () => {
+    setIsOpen(!isOpen);
+  };
+
   return (
     <header className="bg-white shadow-sm z-10">
       <div className="flex items-center justify-between h-16 px-4 ml-64">
@@ -29,21 +37,15 @@ function Navbar({ user }: Props) {
         </div>
         <div className="flex items-center space-x-4">
           <div className="relative">
-            <button className="flex items-center space-x-2 focus:outline-none">
-              {/* <div className="relative w-8 h-8 rounded-full overflow-hidden">
-                <Image
-                  src="/profile-placeholder.jpg"
-                  alt="MA"
-                  layout="fill"
-                  objectFit="cover"
-                />
-              </div> */}
-              <span className="hidden md:inline text-sm font-medium">
-                {user?.username}
-              </span>
+            <button
+              onClick={handleDialog}
+              className="flex items-center space-x-1 px-3 py-1.5 text-sm font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Upload
             </button>
           </div>
         </div>
+        <CameraModal isOpen={isOpen} handleDialog={handleDialog} />
       </div>
     </header>
   );
