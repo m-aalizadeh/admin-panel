@@ -12,6 +12,7 @@ type DashboardProps = {
 
 function DashboardLayout({ children, title = "Dashboard" }: DashboardProps) {
   const { user } = useAuth();
+
   return (
     <div>
       <Head>{title}</Head>

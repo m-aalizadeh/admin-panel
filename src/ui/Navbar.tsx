@@ -1,40 +1,44 @@
-import { SignedUser } from "../types/user";
+import { User } from "../types/user";
 import { useState, useEffect } from "react";
-import { commonFetch } from "@/services/api";
+import { commonFetch, uploadFile } from "@/services/api";
 import CameraModal from "./CameraModal";
 import Avatar from "./Avatar";
 
 type Props = {
-  user: SignedUser | null;
+  user: User;
 };
 
 function Navbar({ user }: Props) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [image, setImage] = useState<string>();
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
-  const handleDialog = () => {
-    setIsOpen(!isOpen);
+  const onCapture = async (imageData: string) => {
+    setCapturedImage(imageData);
+    await uploadFile(imageData, user.id);
   };
 
   const getPhoto = async () => {
-    const result = await commonFetch(
-      "GET",
-      `files/getFile/67fd2df85f55feea48bea1eb`
-    );
+    const result = await commonFetch("GET", `files/getFile/${user?.id}`);
     if (result.status === "success") {
       const uint8Array = new Uint8Array(result?.data?.data);
-      const base64String = btoa(
-        String.fromCharCode.apply(null, result?.data?.data)
-      );
+      const base64String = btoa(String.fromCharCode.apply(null, uint8Array));
       const imageType = "image/jpeg";
       const dataUrl = `data:${imageType};base64,${base64String}`;
-      setImage(dataUrl);
+      setCapturedImage(dataUrl);
     }
   };
 
+  const handleDialog = async () => {
+    await getPhoto();
+    setCapturedImage(null);
+    setIsOpen(!isOpen);
+  };
+
   useEffect(() => {
-    getPhoto();
-  }, []);
+    if (user?.id && capturedImage === null) {
+      getPhoto();
+    }
+  }, [user]);
 
   return (
     <header className="bg-white shadow-sm z-10">
@@ -59,17 +63,15 @@ function Navbar({ user }: Props) {
         </div>
         <div className="flex items-center space-x-4">
           <div className="relative">
-            <Avatar
-              src={image}
-              alt="MA"
-              onClick={handleDialog}
-              className="flex items-center space-x-1 px-3 py-1.5 text-sm font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Upload
-            </Avatar>
+            <Avatar src={capturedImage} alt="MA" onClick={handleDialog} />
           </div>
         </div>
-        <CameraModal isOpen={isOpen} handleDialog={handleDialog} />
+        <CameraModal
+          isOpen={isOpen}
+          capturedImage={capturedImage}
+          onCapture={onCapture}
+          handleDialog={handleDialog}
+        />
       </div>
     </header>
   );

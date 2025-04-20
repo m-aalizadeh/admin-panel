@@ -66,7 +66,7 @@ export const commonFetch = async (
   }
 };
 
-export const uploadFile = async (file: string) => {
+export const uploadFile = async (file: string, userId: string) => {
   try {
     const blob = dataURLtoBlob(file);
     const formData = new FormData();
@@ -75,16 +75,13 @@ export const uploadFile = async (file: string) => {
     formData.append("timestamp", new Date().toISOString());
     formData.append("device", "web-camera");
     const token = localStorage.getItem("token");
-    const response = await fetch(
-      BASE_URL + `files/uploadFile/67fd2df85f55feea48bea1eb`,
-      {
-        method: "POST",
-        body: formData,
-        headers: {
-          Authorization: `Bearer ${JSON.parse(token)}`,
-        },
-      }
-    );
+    const response = await fetch(BASE_URL + `files/uploadFile/${userId}`, {
+      method: "POST",
+      body: formData,
+      headers: {
+        Authorization: `Bearer ${JSON.parse(token)}`,
+      },
+    });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
