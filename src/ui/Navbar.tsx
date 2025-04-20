@@ -1,11 +1,45 @@
-import Image from "next/image";
-import { SignedUser } from "../types/user";
+import { User } from "../types/user";
+import { useState, useEffect } from "react";
+import { commonFetch, uploadFile } from "@/services/api";
+import CameraModal from "./CameraModal";
+import Avatar from "./Avatar";
 
 type Props = {
-  user: SignedUser | null;
+  user: User;
 };
 
 function Navbar({ user }: Props) {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+
+  const onCapture = async (imageData: string) => {
+    setCapturedImage(imageData);
+    await uploadFile(imageData, user.id);
+  };
+
+  const getPhoto = async () => {
+    const result = await commonFetch("GET", `files/getFile/${user?.id}`);
+    if (result.status === "success") {
+      const uint8Array = new Uint8Array(result?.data?.data);
+      const base64String = btoa(String.fromCharCode.apply(null, uint8Array));
+      const imageType = "image/jpeg";
+      const dataUrl = `data:${imageType};base64,${base64String}`;
+      setCapturedImage(dataUrl);
+    }
+  };
+
+  const handleDialog = async () => {
+    await getPhoto();
+    setCapturedImage(null);
+    setIsOpen(!isOpen);
+  };
+
+  useEffect(() => {
+    if (user?.id && capturedImage === null) {
+      getPhoto();
+    }
+  }, [user]);
+
   return (
     <header className="bg-white shadow-sm z-10">
       <div className="flex items-center justify-between h-16 px-4 ml-64">
@@ -29,21 +63,15 @@ function Navbar({ user }: Props) {
         </div>
         <div className="flex items-center space-x-4">
           <div className="relative">
-            <button className="flex items-center space-x-2 focus:outline-none">
-              {/* <div className="relative w-8 h-8 rounded-full overflow-hidden">
-                <Image
-                  src="/profile-placeholder.jpg"
-                  alt="MA"
-                  layout="fill"
-                  objectFit="cover"
-                />
-              </div> */}
-              <span className="hidden md:inline text-sm font-medium">
-                {user?.username}
-              </span>
-            </button>
+            <Avatar src={capturedImage} alt="MA" onClick={handleDialog} />
           </div>
         </div>
+        <CameraModal
+          isOpen={isOpen}
+          capturedImage={capturedImage}
+          onCapture={onCapture}
+          handleDialog={handleDialog}
+        />
       </div>
     </header>
   );

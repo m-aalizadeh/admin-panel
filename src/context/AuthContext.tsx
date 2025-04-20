@@ -98,9 +98,35 @@ export default function AuthProvider({
     }
   };
 
+  const getCurrentUser = async () => {
+    dispatch({ type: "loading" });
+    try {
+      const response = await commonFetch("GET", "user/currentUser");
+      if (response.user) {
+        const { email, _id, username, role } = response.user;
+        dispatch({
+          type: "signin",
+          payload: { email, id: _id, username, role },
+        });
+      }
+    } catch (err: any) {
+      const message =
+        err?.response?.validationErrors?.[0]?.msg ||
+        err?.response?.message ||
+        "Authentication failed";
+      dispatch({ type: "rejected", payload: message });
+    }
+  };
+
   useEffect(() => {
     getCsrfToken();
   }, []);
+
+  useEffect(() => {
+    if (user === null && localStorage.getItem("token")) {
+      getCurrentUser();
+    }
+  }, [user]);
 
   async function signin(values: SignedUser) {
     dispatch({ type: "loading" });
@@ -110,7 +136,7 @@ export default function AuthProvider({
         "user/signin",
         undefined,
         values,
-        { "X-CSRF-Token": csrfToken }
+        { "X-CSRF-Token": csrfToken, credentials: "include" }
       );
       const { data = {}, token, message } = response;
       const { email, _id, username, role } = data;
