@@ -1,10 +1,9 @@
 import { dataURLtoBlob } from "./utils";
 const BASE_URL = "http://localhost:8000/api/v1/";
 
-interface FetchOptions {
-  method: "GET" | "POST" | "PATCH" | "DELETE";
+interface FetchOptions extends RequestInit {
   headers: Record<string, string>;
-  body?: string;
+  credentials?: RequestCredentials;
 }
 
 export const commonFetch = async (
@@ -29,28 +28,25 @@ export const commonFetch = async (
       "cache-control": "no-cache",
     };
 
-    const token = localStorage.getItem("token");
-    if (token) {
-      headers = { ...headers, Authorization: `Bearer ${JSON.parse(token)}` };
-    }
     if (optionalHeaders) {
       headers = { ...headers, ...optionalHeaders };
     }
-    let content: FetchOptions;
+    let content: FetchOptions = { headers, credentials: "include" };
     switch (method) {
       case "POST":
       case "PATCH":
         content = {
+          ...content,
           method,
-          headers,
+
           body: JSON.stringify(payload),
         };
         break;
       case "GET":
       case "DELETE":
         content = {
+          ...content,
           method,
-          headers,
         };
         break;
       default:
@@ -74,23 +70,18 @@ export const uploadFile = async (file: string, userId: string) => {
   try {
     const blob = dataURLtoBlob(file);
     const formData = new FormData();
-    console.log(blob);
     formData.append("file", blob, "capture-image.jpg");
     formData.append("timestamp", new Date().toISOString());
     formData.append("device", "web-camera");
-    const token = localStorage.getItem("token");
     const response = await fetch(BASE_URL + `files/uploadFile/${userId}`, {
       method: "POST",
       body: formData,
-      headers: {
-        Authorization: `Bearer ${JSON.parse(token)}`,
-      },
+      credentials: "include",
     });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const result = await response.json();
-    console.log("Upload successful: ", result);
     return result;
   } catch (error) {
     console.error("Upload Failed: ", error);

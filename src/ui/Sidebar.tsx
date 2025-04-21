@@ -35,9 +35,9 @@ function Sidebar() {
     },
   ];
 
-  const handleLogOut = () => {
+  const handleLogOut = async () => {
     setIsLoggingOut(true);
-    logout();
+    await logout();
     setIsLoggingOut(false);
   };
   const pathname = usePathname();

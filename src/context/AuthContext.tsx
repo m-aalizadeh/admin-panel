@@ -119,14 +119,9 @@ export default function AuthProvider({
   };
 
   useEffect(() => {
+    getCurrentUser();
     getCsrfToken();
   }, []);
-
-  useEffect(() => {
-    if (user === null && localStorage.getItem("token")) {
-      getCurrentUser();
-    }
-  }, [user]);
 
   async function signin(values: SignedUser) {
     dispatch({ type: "loading" });
@@ -138,9 +133,8 @@ export default function AuthProvider({
         values,
         { "X-CSRF-Token": csrfToken, credentials: "include" }
       );
-      const { data = {}, token, message } = response;
+      const { data = {}, message } = response;
       const { email, _id, username, role } = data;
-      localStorage.setItem("token", JSON.stringify(token));
       dispatch({ type: "signin", payload: { email, id: _id, username, role } });
       toast.success(message);
       router.push("/dashboard");
@@ -164,9 +158,8 @@ export default function AuthProvider({
         values,
         { "X-CSRF-Token": csrfToken }
       );
-      const { data = {}, token, message } = response;
+      const { data = {}, message } = response;
       const { email, _id, username, role } = data;
-      localStorage.setItem("token", JSON.stringify(token));
       dispatch({ type: "signup", payload: { email, id: _id, username, role } });
       toast.success(message);
       router.push("/dashboard");
@@ -180,9 +173,9 @@ export default function AuthProvider({
     }
   }
 
-  function logout() {
+  async function logout() {
     try {
-      localStorage.clear();
+      await commonFetch("GET", "user/logout");
       router.push("/");
       dispatch({ type: "logout" });
     } catch (err) {
