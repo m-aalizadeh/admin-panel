@@ -58,6 +58,10 @@ export const commonFetch = async (
     }
 
     const response = await fetch(finalEndPoint, content);
+    if (!response.ok && response.status === 401) {
+      window.location.href = "/signin";
+      throw new Error("User is not authorized / Token got expired!!!");
+    }
     const responseJson = await response.json();
     return responseJson;
   } catch (error) {
