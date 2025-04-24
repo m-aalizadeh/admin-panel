@@ -31,14 +31,12 @@ function Signup() {
     handleSubmit,
     formState: { errors },
   } = useForm({ resolver: yupResolver(schema), mode: "onTouched" });
-  const [loader, setLoader] = useState(false);
+
   const router = useRouter();
-  const { signup } = useAuth();
+  const { signup, isLoading } = useAuth();
 
   const onSubmit = async (values: User) => {
-    setLoader(true);
     await signup(values);
-    setLoader(false);
   };
 
   return (
@@ -71,10 +69,10 @@ function Signup() {
         />
         <div className="flex items-center justify-center">
           <Button
-            disabled={loader}
+            disabled={isLoading}
             className="w-full bg-blue-500 text-white p-2 rounded"
           >
-            {loader ? (
+            {isLoading ? (
               <div className="flex items-center justify-center">
                 <Loader />
               </div>

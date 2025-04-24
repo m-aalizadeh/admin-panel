@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/ui/Button";
 import RHFTextField from "@/ui/RHFTextField";
@@ -23,14 +22,11 @@ function Signin() {
     handleSubmit,
     formState: { errors },
   } = useForm({ resolver: yupResolver(schema), mode: "onTouched" });
-  const [loader, setLoader] = useState(false);
   const router = useRouter();
-  const { signin } = useAuth();
+  const { signin, isLoading } = useAuth();
 
   const onSubmit = async (values: SignedUser) => {
-    setLoader(true);
-    signin(values);
-    setLoader(false);
+    await signin(values);
   };
 
   return (
@@ -56,10 +52,10 @@ function Signin() {
         />
         <div>
           <Button
-            disabled={loader}
+            disabled={isLoading}
             className="w-full bg-blue-500 text-white p-2 rounded"
           >
-            {loader ? (
+            {isLoading ? (
               <div className="flex items-center justify-center">
                 <Loader />
               </div>
