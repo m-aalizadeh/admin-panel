@@ -119,9 +119,18 @@ export default function AuthProvider({
   };
 
   useEffect(() => {
-    getCurrentUser();
     getCsrfToken();
   }, []);
+
+  useEffect(() => {
+    if (
+      isLoading &&
+      window.location.pathname.startsWith("/dashboard") &&
+      user === null
+    ) {
+      getCurrentUser();
+    }
+  }, [isLoading]);
 
   async function signin(values: SignedUser) {
     dispatch({ type: "loading" });
