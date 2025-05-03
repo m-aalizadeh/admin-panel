@@ -20,10 +20,10 @@ function Signin() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isLoading },
   } = useForm({ resolver: yupResolver(schema), mode: "onTouched" });
   const router = useRouter();
-  const { signin, isLoading } = useAuth();
+  const { signin } = useAuth();
 
   const onSubmit = async (values: SignedUser) => {
     await signin(values);

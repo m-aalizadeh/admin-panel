@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 import Button from "@/ui/Button";
 import RHFTextField from "@/ui/RHFTextField";
 import Loader from "@/ui/Loader";
@@ -29,11 +28,11 @@ function Signup() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isLoading },
   } = useForm({ resolver: yupResolver(schema), mode: "onTouched" });
 
   const router = useRouter();
-  const { signup, isLoading } = useAuth();
+  const { signup } = useAuth();
 
   const onSubmit = async (values: User) => {
     await signup(values);
