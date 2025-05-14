@@ -5,7 +5,7 @@ import CameraModal from "./CameraModal";
 import Avatar from "./Avatar";
 
 type Props = {
-  user: User;
+  user: User | null;
 };
 
 function Navbar({ user }: Props) {
@@ -14,14 +14,14 @@ function Navbar({ user }: Props) {
 
   const onCapture = async (imageData: string) => {
     setCapturedImage(imageData);
-    await uploadFile(imageData, user.id);
+    await uploadFile(imageData, user?.id);
   };
 
   const getPhoto = async () => {
     const result = await commonFetch("GET", `files/getFile/${user?.id}`);
     if (result.status === "success") {
       const uint8Array = new Uint8Array(result?.data?.data);
-      const base64String = btoa(String.fromCharCode.apply(null, uint8Array));
+      const base64String = btoa(String.fromCharCode(...uint8Array));
       const imageType = "image/jpeg";
       const dataUrl = `data:${imageType};base64,${base64String}`;
       setCapturedImage(dataUrl);

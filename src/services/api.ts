@@ -1,5 +1,5 @@
 import { dataURLtoBlob } from "./utils";
-const BASE_URL = "http://localhost:8000/api/v1/";
+const BASE_URL = "https://admin-panel-js.liara.run/api/v1/";
 
 interface FetchOptions extends RequestInit {
   headers: Record<string, string>;
@@ -14,7 +14,7 @@ export const commonFetch = async (
   optionalHeaders?: Record<string, string>
 ): Promise<any> => {
   try {
-    let finalEndPoint = process.env.BASE_URL || BASE_URL;
+    let finalEndPoint = BASE_URL;
     if (queryParams) {
       finalEndPoint += queryParams;
     }
@@ -66,7 +66,7 @@ export const commonFetch = async (
   }
 };
 
-export const uploadFile = async (file: string, userId: string) => {
+export const uploadFile = async (file: string, userId?: string) => {
   try {
     const blob = dataURLtoBlob(file);
     const formData = new FormData();
